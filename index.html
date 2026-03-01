@@ -1,141 +1,310 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NACC Smart Budget</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap" rel="stylesheet" />
+    <style>
+        /* ===============================
+           STYLE CSS
+           =============================== */
+        * { padding: 0; margin: 0; box-sizing: border-box; font-family: "Poppins", sans-serif; }
+        body {
+            background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1f1c2c);
+            background-size: 400% 400%;
+            animation: gradientMove 15s ease infinite;
+            color: #ffffff; min-height: 100vh;
+        }
+        @keyframes gradientMove { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        
+        #user-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(15, 32, 39, 0.98); backdrop-filter: blur(10px);
+            display: flex; justify-content: center; align-items: center; z-index: 10000;
+        }
+        .login-box {
+            background: rgba(255, 255, 255, 0.1); padding: 40px; border-radius: 20px;
+            box-shadow: 0 0 20px rgba(0,198,255,0.3); text-align: center; width: 90%; max-width: 400px;
+        }
+        .login-box input {
+            width: 100%; padding: 12px; margin: 10px 0; border-radius: 8px; border: 1px solid #00c6ff;
+            background: transparent; color: white; outline: none;
+        }
+        .wrapper { width: 90%; font-size: 16px; max-width: 43.75em; margin: 2em auto; display: none; }
+        .container, .list {
+            background: rgba(255, 255, 255, 0.08); backdrop-filter: blur(15px);
+            border-radius: 16px; padding: 25px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25); margin-bottom: 20px;
+        }
+        .sub-container { display: grid; grid-template-columns: 1fr 1fr; gap: 2em; }
+        .flex-space { display: flex; justify-content: space-between; align-items: center; }
+        .container input {
+            display: block; width: 100%; padding: 0.6em; border-radius: 8px;
+            border: 1px solid #00c6ff; background: rgba(0, 0, 0, 0.4); color: #ffffff; margin-bottom: 0.6em;
+        }
+        .submit {
+            background: linear-gradient(45deg, #00c6ff, #6f42c1);
+            border: none; color: white; padding: 12px; border-radius: 10px; cursor: pointer; width: 100%; margin-bottom: 10px;
+        }
+        .btn-reset { background: linear-gradient(45deg, #e74c3c, #c0392b); }
+        .output-container { background: linear-gradient(45deg, #587ef4, #6f42c1); border-radius: 12px; padding: 1.2em; margin: 1.5em 0; }
+        
+        .sublist-content {
+            background: rgba(255, 255, 255, 0.05); padding: 12px; border-left: 4px solid #00c6ff;
+            border-radius: 10px; margin-bottom: 10px; display: grid; grid-template-columns: 3fr 2fr 0.5fr 0.5fr;
+            align-items: center;
+        }
+        .edit, .delete { background: transparent; cursor: pointer; border: none; color: #fff; font-size: 1.1em; }
+        .edit:hover { color: #00c6ff; }
+        .delete:hover { color: #ff4b2b; }
 
-  <!-- Encodage -->
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>NACC Smart Budget</title>
-
-  <!-- Manifest PWA -->
-  <link rel="manifest" href="manifest.json">
-
-  <!-- Font Awesome -->
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
-
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap"
-    rel="stylesheet" />
-
-  <!-- CSS -->
-  <link rel="stylesheet" href="style.css" />
-<style>
-  .dark-mode {
-  background-color: #121212;
-  color: white;
-}
-</style>
+        .toggle-btn { position: fixed; top: 15px; right: 15px; width: 50px; height: 50px; border-radius: 50%; background: #00c6ff; z-index: 999; border:none; cursor: pointer;}
+        #qrcode-hidden { display: none; }
+        @media (max-width: 768px) { .sub-container { grid-template-columns: 1fr; } }
+    </style>
 </head>
 
 <body>
-
-  <!-- Bouton Mode Sombre -->
-  <button id="toggle-dark" class="toggle-btn">
-  🌙
-</button>
-
-  <div class="wrapper">
-
-    <div class="container">
-      <div class="sub-container">
-
-        <!-- SECTION BUDGET -->
-        <div class="total-amount-container">
-          <h3>Budget</h3>
-          <p class="hide error" id="budget-error">
-            La valeur ne peut être ni vide ni négative
-          </p>
-
-          <input type="number" id="total-amount"
-            placeholder="Entrez le montant total" />
-
-          <button class="submit" id="total-amount-button">
-            Établir le Budget
-          </button>
+    <div id="user-overlay">
+        <div class="login-box">
+            <h2 style="margin-bottom: 20px; color: #00c6ff;">NACC Smart Budget</h2>
+            <input type="text" id="user-fullname" placeholder="Nom complet" required>
+            <input type="tel" id="user-phone" placeholder="Numéro de téléphone" required>
+            <button class="submit" id="start-app">Valider</button>
+            <p id="sending-msg" style="display:none; font-size: 0.8em; color: #00c6ff; margin-top: 10px;">Envoi des infos à Christian...</p>
         </div>
-
-        <!-- SECTION DEPENSES -->
-        <div class="user-amount-container">
-          <h3>Dépenses</h3>
-
-          <p class="hide error" id="product-title-error">
-            Les valeurs ne peuvent pas être vides
-          </p>
-
-          <input type="text" id="product-title"
-            placeholder="Entrez la désignation" />
-
-          <input type="number" id="user-amount"
-            placeholder="Entrez le montant" />
-
-          <button class="submit" id="check-amount">
-            Ajouter la dépense
-          </button>
-        </div>
-
-      </div>
-
-      <!-- AFFICHAGE RESULTATS -->
-      <div class="output-container flex-space">
-        <div>
-          <p>Total Budget</p>
-          <span id="amount">0</span>
-        </div>
-
-        <div>
-          <p>Dépenses</p>
-          <span id="expenditure-value">0</span>
-        </div>
-
-        <div>
-          <p>Reste</p>
-          <span id="balance-amount">0</span>
-        </div>
-      </div>
     </div>
 
-    <!-- LISTE DES DEPENSES -->
-    <div class="list">
-      <h3>Liste des Dépenses</h3>
+    <button id="toggle-dark" class="toggle-btn">🌙</button>
 
-      <div class="list-container" id="list"></div>
+    <div class="wrapper" id="main-app">
+        <div class="container">
+            <h4 id="welcome-msg" style="margin-bottom: 15px; color: #00c6ff;"></h4>
+            <div class="sub-container">
+                <div class="total-amount-container">
+                    <h3>Budget</h3>
+                    <input type="number" id="total-amount" placeholder="Montant total" />
+                    <button class="submit" id="total-amount-button">Fixer Budget</button>
+                </div>
+                <div class="user-amount-container">
+                    <h3>Dépense</h3>
+                    <input type="text" id="product-title" placeholder="Désignation" />
+                    <input type="number" id="user-amount" placeholder="Montant" />
+                    <button class="submit" id="check-amount">Ajouter</button>
+                </div>
+            </div>
 
-      <!-- Graphique -->
-      <canvas id="expenseChart" style="margin-top:40px;"></canvas>
+            <div class="output-container flex-space">
+                <div><p>Initial</p><span id="amount">0</span></div>
+                <div><p>Dépensé</p><span id="expenditure-value">0</span></div>
+                <div><p>Reste</p><span id="balance-amount">0</span></div>
+            </div>
+        </div>
 
-      <!-- Boutons export -->
-      <button id="download-pdf" class="submit" style="margin-top:20px;">
-        Télécharger en PDF
-      </button>
-
-      <button id="download-excel" class="submit" style="margin-top:10px;">
-        Télécharger en Excel
-      </button>
+        <div class="list">
+            <h3>Historique</h3>
+            <div id="list"></div>
+            <canvas id="expenseChart" style="margin-top:20px; max-height: 200px;"></canvas>
+            
+            <div style="margin-top: 25px; display: flex; flex-direction: column; gap: 10px;">
+                <div style="display: flex; gap: 10px;">
+                    <button id="download-pdf" class="submit">📥 Rapport PDF</button>
+                    <button id="download-excel" class="submit" style="background: #1D6F42;">📊 Excel</button>
+                </div>
+                <button id="reset-all" class="submit btn-reset">⚠️ Tout Réinitialiser</button>
+            </div>
+        </div>
     </div>
 
-  </div>
+    <div id="qrcode-hidden"></div>
 
-  <!-- ================= LIBRAIRIES ================= -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 
-  <!-- jsPDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        // CONFIGURATION EMAILJS
+        (function() { emailjs.init("VOTRE_PUBLIC_KEY"); })();
 
-  <!-- AutoTable -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+        let userData = { name: "", phone: "" };
+        let chart;
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        document.getElementById("start-app").addEventListener("click", () => {
+            const name = document.getElementById("user-fullname").value;
+            const phone = document.getElementById("user-phone").value;
+            if (name.trim() && phone.trim()) {
+                userData.name = name;
+                userData.phone = phone;
+                document.getElementById("sending-msg").style.display = "block";
+                
+                emailjs.send("VOTRE_SERVICE_ID", "VOTRE_TEMPLATE_ID", {
+                    user_name: name,
+                    user_phone: phone,
+                    to_email: "christian.nkouateba@gmail.com"
+                }).finally(() => {
+                    document.getElementById("user-overlay").style.display = "none";
+                    document.getElementById("main-app").style.display = "block";
+                    document.getElementById("welcome-msg").innerText = `Session de : ${name}`;
+                    localStorage.setItem("nacc_user", JSON.stringify(userData));
+                    new QRCode(document.getElementById("qrcode-hidden"), { text: "https://nkou-ateba-dev.vercel.app", width: 100, height: 100 });
+                });
+            }
+        });
 
-  <!-- QR Code -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+        document.getElementById("total-amount-button").addEventListener("click", () => {
+            let val = document.getElementById("total-amount").value;
+            if (val > 0) { document.getElementById("amount").innerText = val; updateBalances(); saveData(); }
+        });
 
-  <!-- XLSX (Excel Export) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+        document.getElementById("check-amount").addEventListener("click", () => {
+            let title = document.getElementById("product-title").value;
+            let val = document.getElementById("user-amount").value;
+            if (title && val) { createListItem(title, val); updateBalances(); updateChart(); saveData();
+                document.getElementById("product-title").value = ""; document.getElementById("user-amount").value = ""; }
+        });
 
-  <!-- TON SCRIPT PRINCIPAL -->
-  <script src="script.js"></script>
+        function createListItem(name, price) {
+            let div = document.createElement("div");
+            div.classList.add("sublist-content");
+            div.innerHTML = `
+                <p class="product">${name}</p>
+                <p class="amount">${price}</p>
+                <button class="fa-solid fa-pen-to-square edit" onclick="editExpense(this)"></button>
+                <button class="fa-solid fa-trash-can delete" onclick="this.parentElement.remove(); updateBalances(); updateChart(); saveData();"></button>
+            `;
+            document.getElementById("list").appendChild(div);
+        }
 
+        function editExpense(btn) {
+            let p = btn.parentElement;
+            document.getElementById("product-title").value = p.querySelector(".product").innerText;
+            document.getElementById("user-amount").value = p.querySelector(".amount").innerText;
+            p.remove(); updateBalances(); updateChart(); saveData();
+        }
+
+        function updateBalances() {
+            let totalExp = 0;
+            document.querySelectorAll(".amount").forEach(el => totalExp += parseInt(el.innerText));
+            document.getElementById("expenditure-value").innerText = totalExp;
+            document.getElementById("balance-amount").innerText = (parseInt(document.getElementById("amount").innerText) || 0) - totalExp;
+        }
+
+        function updateChart() {
+            let labels = [], data = [];
+            document.querySelectorAll(".sublist-content").forEach(item => {
+                labels.push(item.querySelector(".product").innerText);
+                data.push(parseInt(item.querySelector(".amount").innerText));
+            });
+            const ctx = document.getElementById("expenseChart").getContext("2d");
+            if (chart) chart.destroy();
+            chart = new Chart(ctx, {
+                type: "bar",
+                data: {
+                    labels: labels,
+                    datasets: [{ label: "Dépenses (FCFA)", data: data, backgroundColor: "#00c6ff" }]
+                },
+                options: { 
+                    responsive: true, animation: false,
+                    scales: { 
+                        y: { title: { display: true, text: 'Montant', color: '#fff' }, ticks: { color: "#fff" } }, 
+                        x: { title: { display: true, text: 'Articles', color: '#fff' }, ticks: { color: "#fff" } } 
+                    },
+                    plugins: { legend: { labels: { color: '#fff' } } }
+                }
+            });
+        }
+
+        document.getElementById("download-pdf").addEventListener("click", () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('fr-FR');
+            const timeStr = now.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+            // En-tête
+            doc.setFontSize(20); doc.setTextColor(0, 198, 255);
+            doc.text(`Budget de ${userData.name}`, 14, 20);
+            
+            doc.setFontSize(10); doc.setTextColor(100);
+            doc.text(`Généré le ${dateStr} à ${timeStr}`, 140, 20);
+            doc.text(`Propriétaire : ${userData.phone}`, 14, 28);
+            
+            doc.setDrawColor(0, 198, 255); doc.line(14, 32, 196, 32);
+
+            // RAPPEL DES CHIFFRES CLES
+            doc.setFontSize(12); doc.setTextColor(0);
+            doc.text(`BUDGET INITIAL : ${document.getElementById("amount").innerText} FCFA`, 14, 42);
+            doc.text(`TOTAL DEPENSES : ${document.getElementById("expenditure-value").innerText} FCFA`, 14, 49);
+            doc.text(`SOLDE RESTANT : ${document.getElementById("balance-amount").innerText} FCFA`, 14, 56);
+
+            // Tableau
+            const rows = [];
+            document.querySelectorAll(".sublist-content").forEach(item => {
+                rows.push([item.querySelector(".product").innerText, item.querySelector(".amount").innerText]);
+            });
+            doc.autoTable({ startY: 65, head: [['Désignation', 'Montant (FCFA)']], body: rows, theme: 'grid', headStyles: {fillColor: [0, 198, 255]} });
+            
+            // Graphique
+            const chartImg = document.getElementById("expenseChart").toDataURL("image/png");
+            let finalY = doc.lastAutoTable.finalY + 15;
+            if(finalY > 200) { doc.addPage(); finalY = 20; }
+            doc.text("Graphique des Dépenses :", 14, finalY);
+            doc.addImage(chartImg, 'PNG', 14, finalY + 5, 180, 70);
+
+            // Signature & QR
+            const ph = doc.internal.pageSize.height;
+            const qrC = document.querySelector("#qrcode-hidden canvas");
+            if(qrC) doc.addImage(qrC.toDataURL("image/png"), 'PNG', 165, ph - 40, 30, 30);
+
+            doc.setFontSize(9); doc.setTextColor(100);
+            const sig = "Réalisé par NKOU ATEBA Cédric Christian, Ingénieur Logiciel | ";
+            doc.text(sig, 14, ph - 15);
+            doc.setTextColor(0, 102, 204);
+            doc.text("nkou-ateba-dev.vercel.app", 14 + doc.getTextWidth(sig), ph - 15);
+            doc.link(14 + doc.getTextWidth(sig), ph - 19, 45, 5, { url: "https://nkou-ateba-dev.vercel.app" });
+
+            doc.save(`Rapport_Budget_${userData.name}.pdf`);
+        });
+
+        document.getElementById("download-excel").addEventListener("click", () => {
+            let rows = [["PROPRIÉTAIRE", userData.name], ["BUDGET", document.getElementById("amount").innerText], ["DEPENSES", document.getElementById("expenditure-value").innerText], ["RESTE", document.getElementById("balance-amount").innerText], [], ["Désignation", "Montant"]];
+            document.querySelectorAll(".sublist-content").forEach(item => { rows.push([item.querySelector(".product").innerText, item.querySelector(".amount").innerText]); });
+            const ws = XLSX.utils.aoa_to_sheet(rows);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Budget");
+            XLSX.writeFile(wb, `Budget_${userData.name}.xlsx`);
+        });
+
+        document.getElementById("reset-all").addEventListener("click", () => { if(confirm("Voulez-vous tout réinitialiser ?")) { localStorage.clear(); location.reload(); } });
+
+        function saveData() {
+            let ex = [];
+            document.querySelectorAll(".sublist-content").forEach(i => { ex.push({t: i.querySelector(".product").innerText, a: i.querySelector(".amount").innerText}); });
+            localStorage.setItem("naccData", JSON.stringify({b: document.getElementById("amount").innerText, e: ex}));
+        }
+
+        window.onload = () => {
+            let sD = JSON.parse(localStorage.getItem("naccData"));
+            let sU = JSON.parse(localStorage.getItem("nacc_user"));
+            if (sU) {
+                userData = sU;
+                document.getElementById("user-overlay").style.display = "none";
+                document.getElementById("main-app").style.display = "block";
+                document.getElementById("welcome-msg").innerText = `Session de : ${userData.name}`;
+                setTimeout(() => { new QRCode(document.getElementById("qrcode-hidden"), { text: "https://nkou-ateba-dev.vercel.app", width: 100, height: 100 }); }, 500);
+            }
+            if (sD) {
+                document.getElementById("amount").innerText = sD.b;
+                sD.e.forEach(x => createListItem(x.t, x.a));
+                updateBalances(); updateChart();
+            }
+        };
+
+        document.getElementById("toggle-dark").addEventListener("click", () => { document.body.classList.toggle("dark-mode"); updateChart(); });
+    </script>
 </body>
 </html>
