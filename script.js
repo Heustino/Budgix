@@ -1,265 +1,70 @@
-// ===============================
-// MODE SOMBRE PAR DÉFAUT
-// ===============================
-document.body.classList.add("dark-mode");
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>NACC Smart Budget</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-// ===============================
-// VARIABLES PRINCIPALES
-// ===============================
-let totalAmount = document.getElementById("total-amount");
-let userAmount = document.getElementById("user-amount");
-const checkAmountButton = document.getElementById("check-amount");
-const totalAmountButton = document.getElementById("total-amount-button");
-const productTitle = document.getElementById("product-title");
-const errorMessage = document.getElementById("budget-error");
-const productTitleError = document.getElementById("product-title-error");
-const amount = document.getElementById("amount");
-const expenditureValue = document.getElementById("expenditure-value");
-const balanceValue = document.getElementById("balance-amount");
-const list = document.getElementById("list");
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
-let tempAmount = 0;
-let chart;
+  <!-- CSS -->
+  <link rel="stylesheet" href="style.css">
 
-// ===============================
-// DEFINIR LE BUDGET
-// ===============================
-totalAmountButton.addEventListener("click", () => {
+  <!-- jsPDF -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  tempAmount = parseInt(totalAmount.value);
+</head>
+<body class="dark-mode">
 
-  if (!tempAmount || tempAmount < 0) {
-    errorMessage.classList.remove("hide");
-    return;
-  }
+<button id="toggle-dark" class="toggle-btn">
+  <i class="fa-solid fa-moon"></i>
+</button>
 
-  errorMessage.classList.add("hide");
+<div class="wrapper">
 
-  amount.innerText = tempAmount;
+  <div class="container total-amount-container">
+    <h3>Définir le Budget</h3>
+    <input type="number" id="total-amount" placeholder="Montant du budget">
+    <button id="total-amount-button" class="submit">Valider Budget</button>
+    <p id="budget-error" class="error hide">Montant invalide</p>
+  </div>
 
-  let currentExpenditure = parseInt(expenditureValue.innerText) || 0;
-  balanceValue.innerText = tempAmount - currentExpenditure;
+  <div class="container user-amount-container">
+    <h3>Ajouter Dépense</h3>
+    <input type="text" id="product-title" placeholder="Désignation">
+    <input type="number" id="user-amount" placeholder="Montant">
+    <button id="check-amount" class="submit">Ajouter</button>
+    <p id="product-title-error" class="error hide">Champs requis</p>
+  </div>
 
-  totalAmount.value = "";
+  <div class="output-container flex-space">
+    <div>
+      <p>Budget</p>
+      <span id="amount">0</span>
+    </div>
+    <div>
+      <p>Dépenses</p>
+      <span id="expenditure-value">0</span>
+    </div>
+    <div>
+      <p>Solde</p>
+      <span id="balance-amount">0</span>
+    </div>
+  </div>
 
-  saveData();
-});
+  <div class="list">
+    <h3>Liste des Dépenses</h3>
+    <div id="list"></div>
+  </div>
 
-// ===============================
-// DESACTIVER BOUTONS EDIT
-// ===============================
-function disableButtons(bool) {
-  let editButtons = document.getElementsByClassName("edit");
-  Array.from(editButtons).forEach(btn => {
-    btn.disabled = bool;
-  });
-}
+  <button id="download-pdf" class="submit" style="margin-top:20px;">
+    Télécharger PDF
+  </button>
 
-// ===============================
-// MODIFIER / SUPPRIMER DEPENSE
-// ===============================
-function modifyElement(element, edit = false) {
+</div>
 
-  let parentDiv = element.parentElement;
-  let parentAmount = parseInt(parentDiv.querySelector(".amount").innerText);
+<script src="script.js"></script>
 
-  let currentExpenditure = parseInt(expenditureValue.innerText) || 0;
-  let newExpenditure = currentExpenditure - parentAmount;
-
-  expenditureValue.innerText = newExpenditure;
-
-  let totalBudget = parseInt(amount.innerText) || 0;
-  balanceValue.innerText = totalBudget - newExpenditure;
-
-  if (edit) {
-    productTitle.value = parentDiv.querySelector(".product").innerText;
-    userAmount.value = parentAmount;
-    disableButtons(true);
-  }
-
-  parentDiv.remove();
-
-  updateChart();
-  saveData();
-}
-
-// ===============================
-// CREER LIGNE DEPENSE
-// ===============================
-function listCreator(name, value) {
-
-  let sublistContent = document.createElement("div");
-  sublistContent.classList.add("sublist-content", "flex-space");
-
-  sublistContent.innerHTML = `
-    <p class="product">${name}</p>
-    <p class="amount">${value}</p>
-  `;
-
-  let editBtn = document.createElement("button");
-  editBtn.classList.add("fa-solid", "fa-pen-to-square", "edit");
-  editBtn.onclick = () => modifyElement(editBtn, true);
-
-  let deleteBtn = document.createElement("button");
-  deleteBtn.classList.add("fa-solid", "fa-trash-can", "delete");
-  deleteBtn.onclick = () => modifyElement(deleteBtn);
-
-  sublistContent.appendChild(editBtn);
-  sublistContent.appendChild(deleteBtn);
-
-  list.appendChild(sublistContent);
-}
-
-// ===============================
-// AJOUTER DEPENSE
-// ===============================
-checkAmountButton.addEventListener("click", () => {
-
-  if (!userAmount.value || !productTitle.value) {
-    productTitleError.classList.remove("hide");
-    return;
-  }
-
-  productTitleError.classList.add("hide");
-  disableButtons(false);
-
-  let expenditure = parseInt(userAmount.value);
-
-  let currentExpenditure = parseInt(expenditureValue.innerText) || 0;
-  let sum = currentExpenditure + expenditure;
-
-  expenditureValue.innerText = sum;
-
-  let totalBudget = parseInt(amount.innerText) || 0;
-  balanceValue.innerText = totalBudget - sum;
-
-  listCreator(productTitle.value, userAmount.value);
-
-  productTitle.value = "";
-  userAmount.value = "";
-
-  updateChart();
-  saveData();
-});
-
-// ===============================
-// GRAPHIQUE
-// ===============================
-function updateChart() {
-
-  let labels = [];
-  let data = [];
-
-  document.querySelectorAll(".sublist-content").forEach(item => {
-    labels.push(item.querySelector(".product").innerText);
-    data.push(parseInt(item.querySelector(".amount").innerText));
-  });
-
-  const ctx = document.getElementById("expenseChart").getContext("2d");
-
-  if (chart) chart.destroy();
-
-  chart = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: labels,
-      datasets: [{
-        label: "Dépenses",
-        data: data,
-        backgroundColor: document.body.classList.contains("dark-mode")
-          ? "rgba(0, 224, 255, 0.7)"
-          : "rgba(13,110,253,0.7)",
-        borderRadius: 8
-      }]
-    },
-    options: {
-      responsive: true,
-      plugins: { legend: { display: false } },
-      scales: {
-        x: {
-          ticks: { color: "#ffffff" },
-          grid: {
-            color: document.body.classList.contains("dark-mode")
-              ? "rgba(255,255,255,0.1)"
-              : "rgba(0,0,0,0.1)"
-          }
-        },
-        y: {
-          ticks: { color: "#ffffff" },
-          grid: {
-            color: document.body.classList.contains("dark-mode")
-              ? "rgba(255,255,255,0.1)"
-              : "rgba(0,0,0,0.1)"
-          }
-        }
-      }
-    }
-  });
-}
-
-// ===============================
-// MODE SOMBRE TOGGLE
-// ===============================
-document.getElementById("toggle-dark").addEventListener("click", () => {
-  document.body.classList.toggle("dark-mode");
-  updateChart();
-});
-
-// ===============================
-// SAUVEGARDE LOCALE
-// ===============================
-function saveData() {
-
-  let data = {
-    budget: amount.innerText,
-    expenses: []
-  };
-
-  document.querySelectorAll(".sublist-content").forEach(item => {
-    data.expenses.push({
-      title: item.querySelector(".product").innerText,
-      amount: item.querySelector(".amount").innerText
-    });
-  });
-
-  localStorage.setItem("naccBudgetData", JSON.stringify(data));
-}
-
-// ===============================
-// CHARGEMENT DONNEES
-// ===============================
-function loadData() {
-
-  let saved = localStorage.getItem("naccBudgetData");
-  if (!saved) return;
-
-  let data = JSON.parse(saved);
-
-  amount.innerText = data.budget;
-  tempAmount = parseInt(data.budget) || 0;
-
-  let totalExpenditure = 0;
-
-  data.expenses.forEach(exp => {
-    listCreator(exp.title, exp.amount);
-    totalExpenditure += parseInt(exp.amount);
-  });
-
-  expenditureValue.innerText = totalExpenditure;
-  balanceValue.innerText = tempAmount - totalExpenditure;
-
-  updateChart();
-}
-
-window.onload = loadData;
-
-// ===============================
-// SERVICE WORKER
-// ===============================
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js")
-      .then(() => console.log("Service Worker enregistré"))
-      .catch(err => console.log("Erreur:", err));
-  });
-}
+</body>
+</html>
