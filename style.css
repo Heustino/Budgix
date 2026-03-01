@@ -1,0 +1,257 @@
+
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  font-family: "Poppins", sans-serif;
+}
+
+/* ===============================
+   FOND GLOBAL CLAIR (PAR DÉFAUT)
+================================= */
+body {
+  background: linear-gradient(-45deg, #0f2027, #203a43, #2c5364, #1f1c2c);
+  background-size: 400% 400%;
+  animation: gradientMove 15s ease infinite;
+  color: #ffffff; /* Texte blanc en mode clair */
+  padding-top: 80px;
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* ===============================
+   STRUCTURE
+================================= */
+.wrapper {
+  width: 90%;
+  font-size: 16px;
+  max-width: 43.75em;
+  margin: 1em auto;
+}
+
+.container {
+  width: 100%;
+}
+
+.sub-container {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3em;
+}
+
+.flex {
+  display: flex;
+  align-items: center;
+}
+
+.flex-space {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* ===============================
+   CARTES PREMIUM
+================================= */
+.container,
+.list {
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(15px);
+  border-radius: 16px;
+  padding: 25px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
+  transition: 0.4s ease;
+}
+
+.container:hover,
+.list:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+}
+
+/* ===============================
+   TITRES
+================================= */
+.wrapper h3,
+.list h3,
+.product,
+.amount,
+.output-container,
+.output-container p,
+.output-container span {
+  color: #ffffff;
+}
+
+/* ===============================
+   INPUTS
+================================= */
+.container input {
+  display: block;
+  width: 100%;
+  padding: 0.6em;
+  border-radius: 8px;
+  border: 1px solid #00c6ff;
+  background: rgba(0, 0, 0, 0.4);
+  color: #ffffff;
+  margin-bottom: 0.6em;
+  outline: none;
+}
+
+.container input::placeholder {
+  color: #cccccc;
+}
+
+/* ===============================
+   BOUTONS
+================================= */
+.submit {
+  background: linear-gradient(45deg, #00c6ff, #6f42c1);
+  border: none;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.submit:hover {
+  box-shadow: 0 0 15px #00c6ff, 0 0 30px #6f42c1;
+  transform: scale(1.05);
+}
+
+/* ===============================
+   OUTPUT CONTAINER
+================================= */
+.output-container {
+  background: linear-gradient(45deg, #587ef4, #6f42c1);
+  border-radius: 12px;
+  margin: 2em 0;
+  padding: 1.2em;
+}
+
+/* ===============================
+   LISTE DEPENSES
+================================= */
+.sublist-content {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 12px;
+  border-left: 4px solid #00c6ff;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  display: grid;
+  grid-template-columns: 3fr 2fr 1fr 1fr;
+  transition: 0.3s ease;
+}
+
+.sublist-content:hover {
+  transform: translateX(5px);
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.product {
+  font-weight: 500;
+  color: #ffffff;
+}
+
+.amount {
+  color: #ffffff;
+}
+
+/* ===============================
+   ICÔNES
+================================= */
+.edit,
+.delete {
+  background: transparent;
+  cursor: pointer;
+  border: none;
+  color: #ffffff;
+  transition: 0.3s ease;
+}
+
+.edit:hover {
+  color: #00c6ff;
+  transform: scale(1.2);
+}
+
+.delete:hover {
+  color: #ff4b2b;
+  transform: scale(1.2);
+}
+
+/* ===============================
+   TOGGLE BUTTON
+================================= */
+/* ===============================
+   TOGGLE BUTTON FIX MOBILE
+================================= */
+.toggle-btn {
+  position: fixed;
+  top: 15px;
+  right: 15px; /* à droite = plus propre */
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  background: linear-gradient(45deg, #00c6ff, #6f42c1);
+  color: white;
+  z-index: 9999; /* 🔥 ultra important */
+  box-shadow: 0 8px 25px rgba(0,0,0,0.4);
+  transition: 0.4s ease;
+}
+
+.toggle-btn:hover {
+  transform: rotate(180deg) scale(1.1);
+}
+
+.toggle-btn:hover {
+  transform: rotate(180deg) scale(1.1);
+}
+
+/* ===============================
+   MODE SOMBRE FUTURISTE
+================================= */
+.dark-mode {
+  background: linear-gradient(135deg, #000428, #004e92);
+  color: #ffffff;
+}
+
+.dark-mode .container,
+.dark-mode .list {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.dark-mode input {
+  background: #1c1c1c;
+  border: 1px solid #00e0ff;
+  color: #ffffff;
+}
+
+.dark-mode .sublist-content {
+  border-left: 4px solid #00e0ff;
+}
+
+/* ===============================
+   RESPONSIVE
+================================= */
+@media (max-width: 768px) {
+  .sub-container {
+    grid-template-columns: 1fr;
+    gap: 1em;
+  }
+
+  .wrapper {
+    padding: 15px;
+  }
+
+  button {
+    width: 100%;
+  }
+}
