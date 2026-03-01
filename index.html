@@ -1,141 +1,70 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-
-  <!-- Encodage -->
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
   <title>NACC Smart Budget</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- Manifest PWA -->
-  <link rel="manifest" href="manifest.json">
-
-  <!-- Font Awesome -->
-  <link rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css" />
-
-  <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap"
-    rel="stylesheet" />
+  <!-- FontAwesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
   <!-- CSS -->
-  <link rel="stylesheet" href="style.css" />
-<style>
-  .dark-mode {
-  background-color: #121212;
-  color: white;
-}
-</style>
-</head>
-
-<body>
-
-  <!-- Bouton Mode Sombre -->
-  <button id="toggle-dark" class="toggle-btn">
-  🌙
-</button>
-
-  <div class="wrapper">
-
-    <div class="container">
-      <div class="sub-container">
-
-        <!-- SECTION BUDGET -->
-        <div class="total-amount-container">
-          <h3>Budget</h3>
-          <p class="hide error" id="budget-error">
-            La valeur ne peut être ni vide ni négative
-          </p>
-
-          <input type="number" id="total-amount"
-            placeholder="Entrez le montant total" />
-
-          <button class="submit" id="total-amount-button">
-            Établir le Budget
-          </button>
-        </div>
-
-        <!-- SECTION DEPENSES -->
-        <div class="user-amount-container">
-          <h3>Dépenses</h3>
-
-          <p class="hide error" id="product-title-error">
-            Les valeurs ne peuvent pas être vides
-          </p>
-
-          <input type="text" id="product-title"
-            placeholder="Entrez la désignation" />
-
-          <input type="number" id="user-amount"
-            placeholder="Entrez le montant" />
-
-          <button class="submit" id="check-amount">
-            Ajouter la dépense
-          </button>
-        </div>
-
-      </div>
-
-      <!-- AFFICHAGE RESULTATS -->
-      <div class="output-container flex-space">
-        <div>
-          <p>Total Budget</p>
-          <span id="amount">0</span>
-        </div>
-
-        <div>
-          <p>Dépenses</p>
-          <span id="expenditure-value">0</span>
-        </div>
-
-        <div>
-          <p>Reste</p>
-          <span id="balance-amount">0</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- LISTE DES DEPENSES -->
-    <div class="list">
-      <h3>Liste des Dépenses</h3>
-
-      <div class="list-container" id="list"></div>
-
-      <!-- Graphique -->
-      <canvas id="expenseChart" style="margin-top:40px;"></canvas>
-
-      <!-- Boutons export -->
-      <button id="download-pdf" class="submit" style="margin-top:20px;">
-        Télécharger en PDF
-      </button>
-
-      <button id="download-excel" class="submit" style="margin-top:10px;">
-        Télécharger en Excel
-      </button>
-    </div>
-
-  </div>
-
-  <!-- ================= LIBRAIRIES ================= -->
+  <link rel="stylesheet" href="style.css">
 
   <!-- jsPDF -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-  <!-- AutoTable -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body class="dark-mode">
 
-  <!-- Chart.js -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<button id="toggle-dark" class="toggle-btn">
+  <i class="fa-solid fa-moon"></i>
+</button>
 
-  <!-- QR Code -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<div class="wrapper">
 
-  <!-- XLSX (Excel Export) -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+  <div class="container total-amount-container">
+    <h3>Définir le Budget</h3>
+    <input type="number" id="total-amount" placeholder="Montant du budget">
+    <button id="total-amount-button" class="submit">Valider Budget</button>
+    <p id="budget-error" class="error hide">Montant invalide</p>
+  </div>
 
-  <!-- TON SCRIPT PRINCIPAL -->
-  <script src="script.js"></script>
+  <div class="container user-amount-container">
+    <h3>Ajouter Dépense</h3>
+    <input type="text" id="product-title" placeholder="Désignation">
+    <input type="number" id="user-amount" placeholder="Montant">
+    <button id="check-amount" class="submit">Ajouter</button>
+    <p id="product-title-error" class="error hide">Champs requis</p>
+  </div>
+
+  <div class="output-container flex-space">
+    <div>
+      <p>Budget</p>
+      <span id="amount">0</span>
+    </div>
+    <div>
+      <p>Dépenses</p>
+      <span id="expenditure-value">0</span>
+    </div>
+    <div>
+      <p>Solde</p>
+      <span id="balance-amount">0</span>
+    </div>
+  </div>
+
+  <div class="list">
+    <h3>Liste des Dépenses</h3>
+    <div id="list"></div>
+  </div>
+
+  <button id="download-pdf" class="submit" style="margin-top:20px;">
+    Télécharger PDF
+  </button>
+
+</div>
+
+<script src="script.js"></script>
 
 </body>
 </html>
