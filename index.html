@@ -1,183 +1,353 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Budgix</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#080c14">
+<meta name="description" content="NACC Smart Budget — Gestionnaire de budget intelligent">
+<link rel="manifest" id="pwa-manifest">
+<title>Smart Budget</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 
-<!-- ─── LOGIN ─── -->
+<!-- ══ LOGIN ══ -->
 <div id="user-overlay">
-    <div class="login-box">
-        <div class="login-logo">Budgix</div>
-        <p class="login-sub">Votre gestionnaire de budget intelligent</p>
-        <div class="field">
-            <label>Nom complet</label>
-            <input type="text" id="user-fullname" placeholder="Ex: Chrys ATEBA" required>
-        </div>
-        <div class="field">
-            <label>Téléphone</label>
-            <input type="tel" id="user-phone" placeholder="Ex: 690 634 101" required>
-        </div>
-        <button class="btn btn-primary" id="start-app" style="margin-top:8px;">
-            <i class="fas fa-rocket"></i> Commencer
-        </button>
-        <p id="login-error" style="color:var(--danger); font-size:0.8rem; margin-top:10px; display:none;">
-            Veuillez remplir tous les champs.
-        </p>
-    </div>
+  <div class="login-box">
+    <div class="login-logo">Smart Budget</div>
+    <p class="login-sub">Gestionnaire de budget intelligent v3</p>
+    <div class="field"><label>Nom complet</label>
+      <input type="text" id="login-name" placeholder="Chrys ATEBA" autocomplete="name"></div>
+    <div class="field"><label>Téléphone</label>
+      <input type="tel" id="login-phone" placeholder="690 634 101" autocomplete="tel"></div>
+    <button class="btn btn-primary" id="start-app" style="margin-top:6px;">
+      <i class="fas fa-rocket"></i> Commencer
+    </button>
+    <p id="login-err" style="color:var(--danger);font-size:.78rem;margin-top:10px;display:none;">
+      Veuillez remplir tous les champs.
+    </p>
+  </div>
 </div>
 
-<!-- ─── TOAST ─── -->
+<!-- ══ TOAST ══ -->
 <div id="toast"></div>
 
-<!-- ─── APP ─── -->
-<div class="wrapper" id="main-app">
+<!-- ══ PWA BANNER ══ -->
+<div id="pwa-banner">
+  <div class="pwa-text">
+    <strong>Installer l'application</strong> pour l'utiliser hors-ligne
+  </div>
+  <div class="pwa-actions">
+    <button class="btn btn-primary btn-sm" id="pwa-install"><i class="fas fa-download"></i> Installer</button>
+    <button class="btn btn-ghost btn-sm" id="pwa-dismiss">Plus tard</button>
+  </div>
+</div>
 
-    <!-- Header -->
-    <div class="app-header fade-in">
-        <div>
-            <div class="app-title">Budgix</div>
-            <div style="font-size:0.8rem; color:var(--muted);" id="welcome-msg"></div>
+<!-- ══ NAVIGATION ══ -->
+<nav id="main-nav">
+  <div class="nav-inner">
+    <div class="nav-logo">Smart Budget</div>
+    <div class="nav-tabs">
+      <button class="nav-tab active" data-page="page-budget"><i class="fas fa-wallet"></i> Budget</button>
+      <button class="nav-tab" data-page="page-goals"><i class="fas fa-piggy-bank"></i> Épargne</button>
+      <button class="nav-tab" data-page="page-history"><i class="fas fa-clock-rotate-left"></i> Historique</button>
+      <button class="nav-tab" data-page="page-import"><i class="fas fa-file-import"></i> Import CSV</button>
+    </div>
+    <div class="nav-user">
+      <span id="nav-username"></span>
+      <button class="btn btn-ghost btn-sm lang-toggle" id="btn-lang" title="Switch language">
+        <i class="fas fa-globe"></i> <span id="lang-label">EN</span>
+      </button>
+      <button class="btn btn-ghost btn-sm" id="btn-logout" title="Déconnexion"><i class="fas fa-sign-out-alt"></i></button>
+    </div>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════
+   PAGE 1 : BUDGET
+══════════════════════════════════════ -->
+<div class="app-page active" id="page-budget">
+
+  <!-- Sélecteur de budgets -->
+  <div class="card">
+    <div class="card-title"><i class="fas fa-layer-group"></i> Mes Budgets</div>
+    <div class="budget-chips" id="budget-chips"></div>
+    <button class="btn btn-ghost btn-sm" id="btn-new-budget">
+      <i class="fas fa-plus"></i> Nouveau budget
+    </button>
+  </div>
+
+  <!-- Formulaires -->
+  <div class="card" id="card-forms">
+    <div class="two-col">
+
+      <!-- Budget setup -->
+      <div>
+        <div class="card-title"><i class="fas fa-wallet"></i> Budget actif</div>
+        <div id="active-budget-info" style="margin-bottom:14px; display:none;">
+          <div style="font-family:'Syne',sans-serif; font-size:1rem; font-weight:700;" id="active-budget-name"></div>
+          <div id="active-budget-type" style="margin-top:4px;"></div>
         </div>
-        <div class="header-actions">
-            <button class="btn btn-ghost btn-sm" id="btn-logout" title="Déconnexion">
-                <i class="fas fa-sign-out-alt"></i>
-            </button>
+        <div class="field"><label>Nouveau montant (FCFA)</label>
+          <input type="number" id="total-amount" placeholder="Ex: 500 000" min="0"></div>
+        <button class="btn btn-primary" id="total-amount-button">
+          <i class="fas fa-check"></i> Mettre à jour le budget
+        </button>
+      </div>
+
+      <!-- Dépense -->
+      <div>
+        <div class="card-title"><i class="fas fa-minus-circle"></i> Dépense</div>
+        <div class="field"><label>Désignation</label>
+          <input type="text" id="product-title" placeholder="Ex: Loyer" list="titles-dl">
+          <datalist id="titles-dl"></datalist>
         </div>
+        <div class="field"><label>Catégorie</label>
+          <select id="expense-category">
+            <option value="🏠 Logement">🏠 Logement</option>
+            <option value="🍽️ Alimentation">🍽️ Alimentation</option>
+            <option value="🚗 Transport">🚗 Transport</option>
+            <option value="💊 Santé">💊 Santé</option>
+            <option value="🎓 Éducation">🎓 Éducation</option>
+            <option value="🎉 Loisirs">🎉 Loisirs</option>
+            <option value="👗 Habillement">👗 Habillement</option>
+            <option value="📱 Télécoms">📱 Télécoms</option>
+            <option value="🔧 Réparations">🔧 Réparations</option>
+            <option value="📦 Divers" selected>📦 Divers</option>
+          </select>
+        </div>
+        <div class="field"><label>Montant (FCFA)</label>
+          <input type="number" id="user-amount" placeholder="Ex: 15 000" min="0"></div>
+        <button class="btn btn-primary" id="check-amount">
+          <i class="fas fa-plus"></i> Ajouter la dépense
+        </button>
+      </div>
     </div>
 
-    <!-- Saisie Budget + Dépense -->
-    <div class="card fade-in">
-        <div class="two-col">
-            <!-- Budget -->
-            <div>
-                <div class="card-title"><i class="fas fa-wallet"></i> Budget</div>
-                <div class="field">
-                    <label>Montant du budget (FCFA)</label>
-                    <input type="number" id="total-amount" placeholder="Ex: 500000" min="0">
-                </div>
-                <button class="btn btn-primary" id="total-amount-button">
-                    <i class="fas fa-check"></i> Fixer le budget
-                </button>
-            </div>
-            <!-- Dépense -->
-            <div>
-                <div class="card-title"><i class="fas fa-minus-circle"></i> Dépense</div>
-                <div class="field">
-                    <label>Désignation</label>
-                    <input type="text" id="product-title" placeholder="Ex: Loyer" list="titles-history">
-                    <datalist id="titles-history"></datalist>
-                </div>
-                <div class="field">
-                    <label>Catégorie</label>
-                    <select id="expense-category">
-                        <option value="🏠 Logement">🏠 Logement</option>
-                        <option value="🍽️ Alimentation">🍽️ Alimentation</option>
-                        <option value="🚗 Transport">🚗 Transport</option>
-                        <option value="💊 Santé">💊 Santé</option>
-                        <option value="🎓 Éducation">🎓 Éducation</option>
-                        <option value="🎉 Loisirs">🎉 Loisirs</option>
-                        <option value="👗 Habillement">👗 Habillement</option>
-                        <option value="📱 Télécoms">📱 Télécoms</option>
-                        <option value="🔧 Réparations">🔧 Réparations</option>
-                        <option value="📦 Divers" selected>📦 Divers</option>
-                    </select>
-                </div>
-                <div class="field">
-                    <label>Montant (FCFA)</label>
-                    <input type="number" id="user-amount" placeholder="Ex: 15000" min="0">
-                </div>
-                <button class="btn btn-primary" id="check-amount">
-                    <i class="fas fa-plus"></i> Ajouter la dépense
-                </button>
-            </div>
-        </div>
-
-        <!-- Statistiques -->
-        <div class="stats-row" style="margin-top:20px;">
-            <div class="stat-card">
-                <div class="stat-label">Budget</div>
-                <div class="stat-value" id="amount">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Dépensé</div>
-                <div class="stat-value warning" id="expenditure-value">0</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Solde</div>
-                <div class="stat-value positive" id="balance-amount">0</div>
-            </div>
-        </div>
-
-        <!-- Barre de progression -->
-        <div class="progress-wrap">
-            <div class="progress-label">
-                <span>Consommation du budget</span>
-                <span id="progress-pct">0%</span>
-            </div>
-            <div class="progress-bar-bg">
-                <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
-            </div>
-        </div>
+    <!-- Stats -->
+    <div class="stats-row" style="margin-top:20px;">
+      <div class="stat-card">
+        <div class="stat-label">Budget</div>
+        <div class="stat-value" id="amount" style="font-size:.95rem;">0 FCFA</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Dépensé</div>
+        <div class="stat-value war" id="expenditure-value" style="font-size:.95rem;">0 FCFA</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Solde</div>
+        <div class="stat-value pos" id="balance-amount" style="font-size:.95rem;">0 FCFA</div>
+      </div>
     </div>
 
-    <!-- Historique -->
-    <div class="card fade-in">
-        <div class="card-title"><i class="fas fa-list"></i> Historique des dépenses</div>
-
-        <!-- Filtres -->
-        <div class="filter-bar">
-            <input type="text" id="search-input" placeholder="🔍 Rechercher...">
-            <select id="filter-category">
-                <option value="">Toutes catégories</option>
-                <option value="🏠 Logement">🏠 Logement</option>
-                <option value="🍽️ Alimentation">🍽️ Alimentation</option>
-                <option value="🚗 Transport">🚗 Transport</option>
-                <option value="💊 Santé">💊 Santé</option>
-                <option value="🎓 Éducation">🎓 Éducation</option>
-                <option value="🎉 Loisirs">🎉 Loisirs</option>
-                <option value="👗 Habillement">👗 Habillement</option>
-                <option value="📱 Télécoms">📱 Télécoms</option>
-                <option value="🔧 Réparations">🔧 Réparations</option>
-                <option value="📦 Divers">📦 Divers</option>
-            </select>
-        </div>
-
-        <div id="list">
-            <div class="empty-state">
-                <i class="fas fa-receipt"></i>
-                Aucune dépense enregistrée.<br>Commencez à saisir vos dépenses ci-dessus.
-            </div>
-        </div>
-
-        <!-- Graphique -->
-        <canvas id="expenseChart"></canvas>
-
-        <!-- Tabs graphique -->
-        <div class="tabs" style="margin-top:16px; margin-bottom:0;">
-            <button class="tab active" data-type="bar">Barres</button>
-            <button class="tab" data-type="pie">Camembert</button>
-            <button class="tab" data-type="doughnut">Anneau</button>
-        </div>
-
-        <!-- Exports -->
-        <div class="export-row">
-            <button id="download-pdf" class="btn btn-ghost">
-                <i class="fas fa-file-pdf"></i> Rapport PDF
-            </button>
-            <button id="download-excel" class="btn btn-success">
-                <i class="fas fa-file-excel"></i> Excel
-            </button>
-            <button id="reset-all" class="btn btn-danger">
-                <i class="fas fa-trash-alt"></i> Réinitialiser
-            </button>
-        </div>
+    <!-- Progress -->
+    <div class="prog-wrap">
+      <div class="prog-label">
+        <span>Consommation du budget</span>
+        <span id="prog-pct">0%</span>
+      </div>
+      <div class="prog-bg"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
     </div>
+  </div>
+
+  <!-- Liste dépenses -->
+  <div class="card">
+    <div class="card-title"><i class="fas fa-list"></i> Dépenses
+      <span id="expense-count" style="font-size:.75rem; font-weight:400; color:var(--muted); text-transform:none; margin-left:4px;"></span>
+    </div>
+
+    <div class="filter-bar">
+      <input type="text" id="search-input" placeholder="🔍 Rechercher...">
+      <select id="filter-category">
+        <option value="">Toutes catégories</option>
+        <option value="🏠 Logement">🏠 Logement</option>
+        <option value="🍽️ Alimentation">🍽️ Alimentation</option>
+        <option value="🚗 Transport">🚗 Transport</option>
+        <option value="💊 Santé">💊 Santé</option>
+        <option value="🎓 Éducation">🎓 Éducation</option>
+        <option value="🎉 Loisirs">🎉 Loisirs</option>
+        <option value="👗 Habillement">👗 Habillement</option>
+        <option value="📱 Télécoms">📱 Télécoms</option>
+        <option value="🔧 Réparations">🔧 Réparations</option>
+        <option value="📦 Divers">📦 Divers</option>
+      </select>
+    </div>
+
+    <div id="list"></div>
+
+    <canvas id="expenseChart" style="margin-top:16px; max-height:230px;"></canvas>
+
+    <div class="tabs" style="margin-top:14px;">
+      <button class="tab active" data-type="bar">Barres</button>
+      <button class="tab" data-type="pie">Camembert</button>
+      <button class="tab" data-type="doughnut">Anneau</button>
+    </div>
+
+    <div class="export-row">
+      <button id="download-pdf" class="btn btn-ghost"><i class="fas fa-file-pdf"></i> PDF</button>
+      <button id="download-excel" class="btn btn-success"><i class="fas fa-file-excel"></i> Excel</button>
+      <button id="btn-archive" class="btn btn-gold"><i class="fas fa-box-archive"></i> Archiver</button>
+      <button id="reset-all" class="btn btn-danger btn-sm"><i class="fas fa-trash-alt"></i> Reset</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+   PAGE 2 : OBJECTIFS D'ÉPARGNE
+══════════════════════════════════════ -->
+<div class="app-page" id="page-goals">
+  <div class="card">
+    <div class="card-title"><i class="fas fa-piggy-bank"></i> Nouvel objectif d'épargne</div>
+    <div class="two-col">
+      <div>
+        <div class="field"><label>Nom de l'objectif</label>
+          <input type="text" id="goal-name" placeholder="Ex: Voyage"></div>
+        <div class="field"><label>Montant cible (FCFA)</label>
+          <input type="number" id="goal-target" placeholder="Ex: 1 000 000" min="0"></div>
+      </div>
+      <div>
+        <div class="field"><label>Montant déjà épargné (FCFA)</label>
+          <input type="number" id="goal-saved" placeholder="Ex: 150 000" min="0"></div>
+        <div class="field"><label>Date limite (optionnel)</label>
+          <input type="date" id="goal-deadline"></div>
+      </div>
+    </div>
+    <button class="btn btn-gold btn-full" id="btn-add-goal">
+      <i class="fas fa-plus"></i> Créer l'objectif
+    </button>
+  </div>
+
+  <div class="card">
+    <div class="card-title"><i class="fas fa-trophy"></i> Mes objectifs</div>
+    <div id="goals-list">
+      <div class="empty-state"><i class="fas fa-piggy-bank"></i>Aucun objectif. Créez votre premier ci-dessus.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+   PAGE 3 : HISTORIQUE
+══════════════════════════════════════ -->
+<div class="app-page" id="page-history">
+  <div class="card">
+    <div class="card-title"><i class="fas fa-clock-rotate-left"></i> Archives budgétaires</div>
+    <p style="font-size:.82rem; color:var(--muted); margin-bottom:16px;">
+      Les budgets archivés sont conservés pour comparaison et référence.
+    </p>
+    <div id="history-list">
+      <div class="empty-state"><i class="fas fa-box-archive"></i>Aucune archive. Archivez un budget depuis l'onglet Budget.</div>
+    </div>
+  </div>
+
+  <!-- Comparaison -->
+  <div class="card" id="compare-card" style="display:none;">
+    <div class="card-title"><i class="fas fa-chart-bar"></i> Comparaison</div>
+    <canvas id="compareChart" style="max-height:260px;"></canvas>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+   PAGE 4 : IMPORT CSV
+══════════════════════════════════════ -->
+<div class="app-page" id="page-import">
+  <div class="card">
+    <div class="card-title"><i class="fas fa-file-import"></i> Importer des dépenses (CSV)</div>
+
+    <div class="upload-zone" id="upload-zone">
+      <i class="fas fa-cloud-upload-alt"></i>
+      <p>Glissez votre fichier CSV ici ou <strong style="color:var(--accent);">cliquez pour parcourir</strong></p>
+      <p style="font-size:.72rem; margin-top:8px; opacity:.6;">Format: Désignation, Montant, Catégorie (optionnel), Date (optionnel)</p>
+      <input type="file" id="csv-file" accept=".csv,.txt" style="display:none;">
+    </div>
+
+    <div class="card" style="background:rgba(0,229,255,0.04); border-color:rgba(0,229,255,0.1); padding:16px; margin-bottom:16px;">
+      <div class="card-title" style="font-size:.78rem; margin-bottom:10px;"><i class="fas fa-info-circle"></i> Format CSV attendu</div>
+      <code style="font-size:.75rem; color:var(--muted); line-height:1.8;">
+        Désignation;Montant;Catégorie;Date<br>
+        Loyer;85000;🏠 Logement;15/01/2025<br>
+        Épicerie;23500;🍽️ Alimentation;<br>
+        Transport;5000;;
+      </code>
+    </div>
+
+    <div id="csv-preview" style="display:none;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <div style="font-size:.85rem; color:var(--muted);" id="csv-count"></div>
+        <div style="display:flex; gap:8px;">
+          <button class="btn btn-primary btn-sm" id="btn-import-confirm">
+            <i class="fas fa-check"></i> Importer
+          </button>
+          <button class="btn btn-ghost btn-sm" id="btn-import-cancel">Annuler</button>
+        </div>
+      </div>
+      <div style="overflow-x:auto;">
+        <table class="csv-table" id="csv-table"></table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Télécharger modèle -->
+  <div class="card">
+    <div class="card-title"><i class="fas fa-download"></i> Modèle CSV</div>
+    <p style="font-size:.82rem; color:var(--muted); margin-bottom:14px;">
+      Téléchargez un fichier modèle pour saisir vos dépenses directement dans Excel ou LibreOffice.
+    </p>
+    <button class="btn btn-ghost" id="btn-download-template">
+      <i class="fas fa-file-csv"></i> Télécharger le modèle
+    </button>
+  </div>
+</div>
+
+<!-- ══ MODALS ══ -->
+<!-- Nouveau budget -->
+<div class="modal-overlay" id="modal-new-budget">
+  <div class="modal-box">
+    <button class="modal-close" data-close="modal-new-budget"><i class="fas fa-times"></i></button>
+    <div class="modal-title"><i class="fas fa-plus-circle"></i> Nouveau budget</div>
+    <div class="field"><label>Nom du budget</label>
+      <input type="text" id="nb-name" placeholder="Ex: Budget Janvier, Projet Mariage…"></div>
+    <div class="field"><label>Type de période</label>
+      <select id="nb-type">
+        <option value="mensuel">📅 Mensuel</option>
+        <option value="hebdo">📆 Hebdomadaire</option>
+        <option value="projet">📋 Par projet</option>
+        <option value="annuel">🗓️ Annuel</option>
+        <option value="perso">✏️ Personnalisé</option>
+      </select>
+    </div>
+    <div class="field"><label>Montant initial (FCFA)</label>
+      <input type="number" id="nb-amount" placeholder="0" min="0"></div>
+    <div style="display:flex; gap:10px; margin-top:4px;">
+      <button class="btn btn-primary" id="btn-create-budget"><i class="fas fa-check"></i> Créer</button>
+      <button class="btn btn-ghost" data-close="modal-new-budget">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- Détail archive -->
+<div class="modal-overlay" id="modal-archive-detail">
+  <div class="modal-box" style="max-width:560px;">
+    <button class="modal-close" data-close="modal-archive-detail"><i class="fas fa-times"></i></button>
+    <div class="modal-title" id="archive-modal-title">Détail archive</div>
+    <div id="archive-modal-body"></div>
+    <button class="btn btn-ghost btn-sm" style="margin-top:16px;" data-close="modal-archive-detail">Fermer</button>
+  </div>
+</div>
+
+<!-- Ajouter épargne -->
+<div class="modal-overlay" id="modal-add-savings">
+  <div class="modal-box">
+    <button class="modal-close" data-close="modal-add-savings"><i class="fas fa-times"></i></button>
+    <div class="modal-title" id="savings-modal-title">Ajouter une épargne</div>
+    <div class="field"><label>Montant épargné (FCFA)</label>
+      <input type="number" id="savings-add-amount" placeholder="Ex: 25 000" min="0"></div>
+    <div style="display:flex; gap:10px; margin-top:4px;">
+      <button class="btn btn-gold" id="btn-confirm-savings"><i class="fas fa-check"></i> Confirmer</button>
+      <button class="btn btn-ghost" data-close="modal-add-savings">Annuler</button>
+    </div>
+  </div>
 </div>
 
 <div id="qrcode-hidden" style="display:none;"></div>
@@ -188,7 +358,7 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-<script src="js/script.js"></script>
 
+<script src="js/script.js"></script>
 </body>
 </html>
